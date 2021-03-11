@@ -1,4 +1,4 @@
-package org.example.rdd;
+package org.modulo9.rdd;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
