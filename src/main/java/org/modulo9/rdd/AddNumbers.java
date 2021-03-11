@@ -42,6 +42,7 @@ public class AddNumbers
         //Step 6. Print the sum
 
         System.out.println("The sum is: " + sum);
+        sparkContext.stop();
 
     }
 }
