@@ -25,22 +25,32 @@ public class CuentaPalabras {
         System.out.println(numLines);
          */
 
-        //preproces words, te las pone planas para poder contarlas, ponemos un espacio como separador
-        JavaRDD<String> words = lines.flatMap(line -> List.of(line.split("")).iterator());
+        // Step 4. preproces words, te las pone planas para poder contarlas, ponemos un espacio como separador
+        JavaRDD<String> words = lines.flatMap(line -> List.of(line.split(" ")).iterator());
 
-        // en este punto ya tengo un array de palabras ahora las tengo que contar
+        // Step 5. en este punto ya tengo un array de palabras ahora las tengo que contar
 
         JavaPairRDD<String,Integer> pares = words.mapToPair(word -> new Tuple2<>(word,1));//primero pasamos las palabras a clave valor
 
-        //ahora contamos las palabras distintas
+        //Step 6. ahora contamos las palabras distintas
 
         JavaPairRDD<String,Integer> groupedPairs = pares.reduceByKey((integer1,integer2)-> integer1+integer2);
 
+
         //aqui ya tengo una lista que cuenta cuantas palabras hay de cada tipo de palabra que aparece
 
-        List<Tuple2<String,Integer>> listapalabras = groupedPairs.collect();
+        // STEP 7: map operation to get an RDD of pairs <sum, key>. We need this step because Spark
+        //         Spark provides a sortByKey() funcion (see next step) but not a sortByValue()
+        JavaPairRDD<Integer, String> reversePairs = groupedPairs
+                .mapToPair(pair -> new Tuple2<>(pair._2(), pair._1()));
 
-        for(Tuple2<?, ?> tuple : listapalabras){
+        // STEP 8: sort the results by key ant take the first 20 elements
+        List<Tuple2<Integer, String>> output = reversePairs
+                .sortByKey(false)
+                .take(20);
+
+
+        for(Tuple2<?, ?> tuple : output){
             System.out.println(tuple._1() + ": " + tuple._2());
         }
 
